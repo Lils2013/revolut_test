@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AccountDao implements Dao<Account> {
 
     private Map<Long, Account> accountMap = new ConcurrentHashMap<>();
+    private final static AccountDao INSTANCE = new AccountDao();
 
     public AccountDao() {
         List<Account> accounts = new ArrayList<>();
@@ -17,6 +18,10 @@ public class AccountDao implements Dao<Account> {
         accounts.forEach(account -> {
             accountMap.put(account.getId(), account);
         });
+    }
+
+    public static AccountDao getInstance() {
+        return INSTANCE;
     }
 
     @Override

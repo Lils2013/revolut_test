@@ -1,5 +1,6 @@
 package tsoy.alexander.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.math.BigDecimal;
@@ -16,6 +17,9 @@ public class Account {
     private String username;
     private BigDecimal amount;
     private Currency currency;
+
+    @JsonIgnore
+    private Object lock = new Object();
 
     public Account(String username, BigDecimal amount, Currency currency) {
         this.id = COUNTER.getAndIncrement();
@@ -50,6 +54,18 @@ public class Account {
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
+    }
+
+    public Object getLock() {
+        return lock;
+    }
+
+    public void withdraw(BigDecimal sum) {
+        amount = amount.subtract(sum);
+    }
+
+    public void deposit(BigDecimal sum) {
+        amount = amount.add(sum);
     }
 
     @Override
