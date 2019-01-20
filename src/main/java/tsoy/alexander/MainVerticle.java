@@ -14,8 +14,6 @@ import tsoy.alexander.dao.TransferDao;
 import tsoy.alexander.model.Account;
 import tsoy.alexander.model.Transfer;
 
-import java.util.Arrays;
-
 public class MainVerticle extends AbstractVerticle {
 
     private Dao<Account> accountDao = AccountDao.getInstance();

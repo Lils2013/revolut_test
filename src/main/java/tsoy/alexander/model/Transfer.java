@@ -15,15 +15,13 @@ public class Transfer {
     private Long sourceAccountId;
     private Long destinationAccountId;
     private BigDecimal amount;
-    private Currency currency;
     private LocalDateTime localDateTime;
 
-    public Transfer(Long sourceAccountId, Long destinationAccountId, BigDecimal amount, Currency currency) {
+    public Transfer(Long sourceAccountId, Long destinationAccountId, BigDecimal amount) {
         this.id = COUNTER.getAndIncrement();
         this.sourceAccountId = sourceAccountId;
         this.destinationAccountId = destinationAccountId;
         this.amount = amount;
-        this.currency = currency;
         this.localDateTime = LocalDateTime.now();
     }
 
@@ -55,14 +53,6 @@ public class Transfer {
         this.amount = amount;
     }
 
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
     public LocalDateTime getLocalDateTime() {
         return localDateTime;
     }
@@ -74,7 +64,6 @@ public class Transfer {
                 ", sourceAccountId=" + sourceAccountId +
                 ", destinationAccountId=" + destinationAccountId +
                 ", amount=" + amount +
-                ", currency=" + currency +
                 ", localDateTime=" + localDateTime +
                 '}';
     }

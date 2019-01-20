@@ -20,7 +20,6 @@ public class TransferDeserializer extends JsonDeserializer<Transfer> {
         final Long sourceAccountId = node.get("sourceAccountId").asLong();
         final Long destinationAccountId = node.get("destinationAccountId").asLong();
         final String amount = node.get("amount").asText();
-        final String currency = node.get("currency").asText();
-        return new Transfer(sourceAccountId, destinationAccountId, new BigDecimal(amount), Currency.getInstance(currency));
+        return new Transfer(sourceAccountId, destinationAccountId, new BigDecimal(amount));
     }
 }

@@ -16,16 +16,14 @@ public class Account {
     private final Long id;
     private String username;
     private BigDecimal amount;
-    private Currency currency;
 
     @JsonIgnore
     private Object lock = new Object();
 
-    public Account(String username, BigDecimal amount, Currency currency) {
+    public Account(String username, BigDecimal amount) {
         this.id = COUNTER.getAndIncrement();
         this.username = username;
         this.amount = amount;
-        this.currency = currency;
     }
 
     public Long getId() {
@@ -48,14 +46,6 @@ public class Account {
         this.amount = amount;
     }
 
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
     public Object getLock() {
         return lock;
     }
@@ -74,7 +64,6 @@ public class Account {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", amount=" + amount +
-                ", currency=" + currency +
                 '}';
     }
 }

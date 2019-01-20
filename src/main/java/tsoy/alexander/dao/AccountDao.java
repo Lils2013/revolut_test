@@ -13,8 +13,8 @@ public class AccountDao implements Dao<Account> {
 
     public AccountDao() {
         List<Account> accounts = new ArrayList<>();
-        accounts.add(new Account("John", new BigDecimal("100.00"), Currency.getInstance("EUR")));
-        accounts.add(new Account("Susan", new BigDecimal("200.00"), Currency.getInstance("EUR")));
+        accounts.add(new Account("John", new BigDecimal("100.00")));
+        accounts.add(new Account("Susan", new BigDecimal("200.00")));
         accounts.forEach(account -> {
             accountMap.put(account.getId(), account);
         });
@@ -31,7 +31,6 @@ public class AccountDao implements Dao<Account> {
 
     @Override
     public List<Account> getAll() {
-
         return new ArrayList<>(accountMap.values());
     }
 

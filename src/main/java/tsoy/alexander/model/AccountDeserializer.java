@@ -19,7 +19,6 @@ public class AccountDeserializer extends JsonDeserializer<Account> {
         JsonNode node = oc.readTree(jsonParser);
         final String name = node.get("username").asText();
         final String amount = node.get("amount").asText();
-        final String currency = node.get("currency").asText();
-        return new Account(name, new BigDecimal(amount), Currency.getInstance(currency));
+        return new Account(name, new BigDecimal(amount));
     }
 }
