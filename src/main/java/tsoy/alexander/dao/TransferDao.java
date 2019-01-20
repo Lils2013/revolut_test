@@ -2,12 +2,18 @@ package tsoy.alexander.dao;
 
 import tsoy.alexander.model.Transfer;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TransferDao implements Dao<Transfer> {
 
     private Map<Long, Transfer> transferMap = new ConcurrentHashMap<>();
+
+    public TransferDao() {
+        Transfer transfer = new Transfer(0L, 1L, new BigDecimal("1.0"), Currency.getInstance("USD"));
+        transferMap.put(transfer.getId(), transfer);
+    }
 
     @Override
     public Optional<Transfer> get(long id) {

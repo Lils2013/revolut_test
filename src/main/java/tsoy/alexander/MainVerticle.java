@@ -10,12 +10,14 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import tsoy.alexander.dao.AccountDao;
 import tsoy.alexander.dao.Dao;
+import tsoy.alexander.dao.TransferDao;
 import tsoy.alexander.model.Account;
 import tsoy.alexander.model.Transfer;
 
 public class MainVerticle extends AbstractVerticle {
 
     private Dao<Account> accountDao = new AccountDao();
+    private Dao<Transfer> transferDao = new TransferDao();
 
     public static void main(final String[] args) {
         Launcher.executeCommand("run", MainVerticle.class.getName());
@@ -38,6 +40,7 @@ public class MainVerticle extends AbstractVerticle {
         router.post("/accounts").handler(this::createAccount);
         router.delete("/accounts/:id").handler(this::deleteAccount);
 
+        router.get("/transfers").handler(this::getAllTransfers);
         router.post("/transfers").handler(this::createTransfer);
 
         vertx.createHttpServer().requestHandler(router::accept).listen(8080, http -> {
@@ -115,11 +118,17 @@ public class MainVerticle extends AbstractVerticle {
         }
     }
 
+    private void getAllTransfers(RoutingContext routingContext) {
+        routingContext.response()
+                .putHeader("content-type", "application/json; charset=utf-8")
+                .end(Json.encodePrettily(transferDao.getAll()));
+    }
+
     private void createTransfer(RoutingContext routingContext) {
         try {
             final Transfer transfer = Json.decodeValue(routingContext.getBodyAsString(),
                     Transfer.class);
-//            transfers.put(transfer.getId(), transfer);
+            transferDao.save(transfer);
             routingContext.response()
                     .setStatusCode(201)
                     .putHeader("content-type", "application/json; charset=utf-8")

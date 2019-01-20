@@ -24,10 +24,6 @@ public class Account {
         this.currency = currency;
     }
 
-    public Account() {
-        this.id = COUNTER.getAndIncrement();
-    }
-
     public Long getId() {
         return id;
     }
