@@ -16,6 +16,7 @@ public class Transfer {
     private Long destinationAccountId;
     private BigDecimal amount;
     private LocalDateTime localDateTime;
+    private TransferStatus result;
 
     public Transfer(Long sourceAccountId, Long destinationAccountId, BigDecimal amount) {
         this.id = COUNTER.getAndIncrement();
@@ -57,6 +58,14 @@ public class Transfer {
         return localDateTime;
     }
 
+    public TransferStatus getResult() {
+        return result;
+    }
+
+    public void setResult(TransferStatus result) {
+        this.result = result;
+    }
+
     @Override
     public String toString() {
         return "Transfer{" +
@@ -66,5 +75,10 @@ public class Transfer {
                 ", amount=" + amount +
                 ", localDateTime=" + localDateTime +
                 '}';
+    }
+
+    public enum TransferStatus {
+        SUCCESSFUL,
+        FAILED
     }
 }

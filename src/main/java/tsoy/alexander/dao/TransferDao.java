@@ -32,9 +32,17 @@ public class TransferDao implements Dao<Transfer> {
 
     @Override
     public void save(Transfer transfer) {
-        transferMap.put(transfer.getId(), transfer);
-        transfer(accountDao.get(transfer.getSourceAccountId()).get(), accountDao.get(transfer.getDestinationAccountId()).get(),
-                transfer.getAmount());
+        try {
+            if (!accountDao.get(transfer.getSourceAccountId()).isPresent() || !accountDao.get(transfer.getDestinationAccountId()).isPresent())
+                throw new IllegalAccessException();
+            transfer(accountDao.get(transfer.getSourceAccountId()).get(), accountDao.get(transfer.getDestinationAccountId()).get(),
+                    transfer.getAmount());
+            transfer.setResult(Transfer.TransferStatus.SUCCESSFUL);
+        } catch (Exception e) {
+            transfer.setResult(Transfer.TransferStatus.FAILED);
+        } finally {
+            transferMap.put(transfer.getId(), transfer);
+        }
     }
 
     @Override
@@ -52,8 +60,12 @@ public class TransferDao implements Dao<Transfer> {
         Object lock2 = acc1.getId() < acc2.getId() ? acc2.getLock() : acc1.getLock();
         synchronized (lock1) {
             synchronized (lock2) {
-                acc1.withdraw(value);
-                acc2.deposit(value);
+                if (acc1.getAmount().compareTo(value) >= 0) {
+                    acc1.withdraw(value);
+                    acc2.deposit(value);
+                } else {
+                    throw new IllegalStateException();
+                }
             }
         }
     }
