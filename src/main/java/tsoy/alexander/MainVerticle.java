@@ -55,9 +55,7 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     private void getAllAccounts(RoutingContext routingContext) {
-        routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
-                .end(Json.encodePrettily(accountDao.getAll()));
+        respondWithSuccess(routingContext, Json.encodePrettily(accountDao.getAll()), 200);
     }
 
     private void getAccount(RoutingContext routingContext) {
@@ -67,9 +65,7 @@ public class MainVerticle extends AbstractVerticle {
             if (!accountDao.get(idAsLong).isPresent()) {
                 respondWithError(routingContext, 404, "Failed to find account with id " + id);
             } else {
-                routingContext.response()
-                        .putHeader("content-type", "application/json; charset=utf-8")
-                        .end(Json.encodePrettily(accountDao.get(idAsLong).get()));
+                respondWithSuccess(routingContext, Json.encodePrettily(accountDao.get(idAsLong).get()), 200);
             }
         } catch (NumberFormatException e) {
             respondWithError(routingContext, 400, "Invalid parameter " + id);
@@ -85,9 +81,7 @@ public class MainVerticle extends AbstractVerticle {
                 respondWithError(routingContext, 400, "Can't create an account with negative balance!");
             } else {
                 accountDao.save(account);
-                routingContext.response().setStatusCode(201)
-                        .putHeader("content-type", "application/json; charset=utf-8")
-                        .end(Json.encodePrettily(account));
+                respondWithSuccess(routingContext, Json.encodePrettily(account), 201);
             }
         } catch (Exception e) {
             respondWithError(routingContext, 400, "Can't parse the body of the request!");
@@ -120,22 +114,12 @@ public class MainVerticle extends AbstractVerticle {
                     transfer.setResult(Transfer.TransferStatus.FAILED);
                 } finally {
                     transferDao.save(transfer);
-                    routingContext.response()
-                            .setStatusCode(201)
-                            .putHeader("content-type", "application/json; charset=utf-8")
-                            .end(Json.encodePrettily(transfer));
+                    respondWithSuccess(routingContext, Json.encodePrettily(transfer), 201);
                 }
             }
         } catch (Exception e) {
             respondWithError(routingContext, 400, "Can't parse the body of the request!");
         }
-    }
-
-    private void respondWithError(RoutingContext routingContext, int i, String s) {
-        routingContext.response().setStatusCode(i).putHeader("content-type", "application/json; charset=utf-8")
-                .end(new JsonObject()
-                        .put("status", "ERROR")
-                        .put("description", s).encodePrettily());
     }
 
     private void transfer(Account acc1, Account acc2, BigDecimal value) {
@@ -145,5 +129,19 @@ public class MainVerticle extends AbstractVerticle {
         } else {
             throw new IllegalStateException();
         }
+    }
+
+    private void respondWithSuccess(RoutingContext routingContext, String data, Integer status) {
+        routingContext.response()
+                .setStatusCode(status)
+                .putHeader("content-type", "application/json; charset=utf-8")
+                .end(data);
+    }
+
+    private void respondWithError(RoutingContext routingContext, int i, String s) {
+        routingContext.response().setStatusCode(i).putHeader("content-type", "application/json; charset=utf-8")
+                .end(new JsonObject()
+                        .put("status", "ERROR")
+                        .put("description", s).encodePrettily());
     }
 }
