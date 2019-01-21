@@ -49,29 +49,20 @@ public class IntegrationTests {
         client.post(8080, "localhost", "/accounts").as(BodyCodec.json(Account.class))
                 .sendJsonObject(new JsonObject().put("username", "Curtis")
                         .put("balance", "3501.25"), response -> testContext.verify(() -> {
-                    if (response.succeeded()) {
-                        assertEquals(201, response.result().statusCode());
-                        Account account = response.result().body();
-                        assertEquals(2L, (long) account.getId());
-                        assertEquals("Curtis", account.getUsername());
-                        assertEquals(new BigDecimal("3501.25"), account.getBalance());
-                    } else {
-                        fail();
-                    }
-                    testContext.completeNow();
-                }));
-        client.get(8080, "localhost", "/accounts/2").as(BodyCodec.json(Account.class))
-                .send(response -> testContext.verify(() -> {
-                    if (response.succeeded()) {
-                        assertEquals(200, response.result().statusCode());
-                        Account account = response.result().body();
-                        assertEquals(2L, (long) account.getId());
-                        assertEquals("Curtis", account.getUsername());
-                        assertEquals(new BigDecimal("3501.25"), account.getBalance());
-                    } else {
-                        fail();
-                    }
-                    testContext.completeNow();
+                    assertEquals(201, response.result().statusCode());
+                    Account account = response.result().body();
+                    assertEquals(2L, (long) account.getId());
+                    assertEquals("Curtis", account.getUsername());
+                    assertEquals(new BigDecimal("3501.25"), account.getBalance());
+                    client.get(8080, "localhost", "/accounts/2").as(BodyCodec.json(Account.class))
+                            .send(response1 -> testContext.verify(() -> {
+                                assertEquals(200, response1.result().statusCode());
+                                Account account1 = response1.result().body();
+                                assertEquals(2L, (long) account1.getId());
+                                assertEquals("Curtis", account1.getUsername());
+                                assertEquals(new BigDecimal("3501.25"), account1.getBalance());
+                                testContext.completeNow();
+                            }));
                 }));
     }
 
@@ -82,15 +73,11 @@ public class IntegrationTests {
         WebClient client = WebClient.create(vertx);
         client.get(8080, "localhost", "/accounts/0").as(BodyCodec.json(Account.class))
                 .send(response -> testContext.verify(() -> {
-                    if (response.succeeded()) {
-                        assertEquals(200, response.result().statusCode());
-                        Account account = response.result().body();
-                        assertEquals(0L, (long) account.getId());
-                        assertEquals("John", account.getUsername());
-                        assertEquals(new BigDecimal("100.00"), account.getBalance());
-                    } else {
-                        fail();
-                    }
+                    assertEquals(200, response.result().statusCode());
+                    Account account = response.result().body();
+                    assertEquals(0L, (long) account.getId());
+                    assertEquals("John", account.getUsername());
+                    assertEquals(new BigDecimal("100.00"), account.getBalance());
                     testContext.completeNow();
                 }));
     }
@@ -115,44 +102,49 @@ public class IntegrationTests {
         client.post(8080, "localhost", "/transfers").as(BodyCodec.json(Transfer.class))
                 .sendJsonObject(new JsonObject().put("sourceAccountId", 0).put("destinationAccountId", 1)
                         .put("amount", "10.00"), response -> testContext.verify(() -> {
-                    if (response.succeeded()) {
-                        assertEquals(201, response.result().statusCode());
-                        Transfer transfer = response.result().body();
-                        assertEquals(0L, (long) transfer.getId());
-                        assertEquals(0L, (long) transfer.getSourceAccountId());
-                        assertEquals(1L, (long) transfer.getDestinationAccountId());
-                        client.get(8080, "localhost", "/accounts/0").as(BodyCodec.json(Account.class))
-                                .send(response1 -> testContext.verify(() -> {
-                                    System.out.println(response1.result().body());
-                                    if (response1.succeeded()) {
-                                        assertEquals(200, response1.result().statusCode());
-                                        Account account = response1.result().body();
-                                        assertEquals(0L, (long) account.getId());
-                                        assertEquals("John", account.getUsername());
-                                        assertEquals(new BigDecimal("90.00"), account.getBalance());
-                                    } else {
-                                        fail();
-                                    }
-                                }));
-                        client.get(8080, "localhost", "/accounts/1").as(BodyCodec.json(Account.class))
-                                .send(response2 -> testContext.verify(() -> {
-                                    System.out.println(response2.result().body());
-                                    if (response2.succeeded()) {
-                                        assertEquals(200, response2.result().statusCode());
-                                        Account account = response2.result().body();
-                                        System.out.println(account.getId());
-                                        assertEquals(0L, (long) account.getId());
-                                        assertEquals("John", account.getUsername());
-                                        assertEquals(new BigDecimal("210.00"), account.getBalance());
-                                    } else {
-                                        testContext.failed();
-                                    }
-                                }));
-                    } else {
-                        fail();
-                    }
-                    testContext.completeNow();
+                    assertEquals(201, response.result().statusCode());
+                    Transfer transfer = response.result().body();
+                    assertEquals(0L, (long) transfer.getId());
+                    assertEquals(0L, (long) transfer.getSourceAccountId());
+                    assertEquals(1L, (long) transfer.getDestinationAccountId());
+                    client.get(8080, "localhost", "/accounts/0").as(BodyCodec.json(Account.class))
+                            .send(response1 -> testContext.verify(() -> {
+                                assertEquals(200, response1.result().statusCode());
+                                Account account = response1.result().body();
+                                assertEquals(0L, (long) account.getId());
+                                assertEquals("John", account.getUsername());
+                                assertEquals(new BigDecimal("90.00"), account.getBalance());
+                                client.get(8080, "localhost", "/accounts/1").as(BodyCodec.json(Account.class))
+                                        .send(response2 -> testContext.verify(() -> {
+                                            assertEquals(200, response2.result().statusCode());
+                                            Account account1 = response2.result().body();
+                                            assertEquals(1L, (long) account1.getId());
+                                            assertEquals("Susan", account1.getUsername());
+                                            assertEquals(new BigDecimal("210.00"), account1.getBalance());
+                                            testContext.completeNow();
+                                        }));
+                            }));
                 }));
+    }
 
+    @Test
+    @DisplayName("Should create a transfer and get list of all transfers")
+    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    void create_transfer_and_get_all(Vertx vertx, VertxTestContext testContext) {
+        WebClient client = WebClient.create(vertx);
+        client.post(8080, "localhost", "/transfers").as(BodyCodec.json(Transfer.class))
+                .sendJsonObject(new JsonObject().put("sourceAccountId", 0).put("destinationAccountId", 1)
+                        .put("amount", "10.00"), response -> testContext.verify(() -> {
+                    assertEquals(201, response.result().statusCode());
+                    Transfer transfer = response.result().body();
+                    assertEquals(0L, (long) transfer.getId());
+                    assertEquals(0L, (long) transfer.getSourceAccountId());
+                    assertEquals(1L, (long) transfer.getDestinationAccountId());
+                    client.get(8080, "localhost", "/transfers").as(BodyCodec.jsonArray())
+                            .send(response1 -> testContext.verify(() -> {
+                                assertEquals(1, response1.result().body().size());
+                                testContext.completeNow();
+                            }));
+                }));
     }
 }

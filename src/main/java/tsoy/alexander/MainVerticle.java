@@ -62,9 +62,7 @@ public class MainVerticle extends AbstractVerticle {
 
     private void getAccount(RoutingContext routingContext) {
         String id = routingContext.request().getParam("id");
-        if (id == null) {
-            respondWithError(routingContext, 400, "Failed to read id");
-        } else {
+        try {
             final long idAsLong = Long.parseLong(id);
             if (!accountDao.get(idAsLong).isPresent()) {
                 respondWithError(routingContext, 404, "Failed to find account with id " + id);
@@ -73,6 +71,8 @@ public class MainVerticle extends AbstractVerticle {
                         .putHeader("content-type", "application/json; charset=utf-8")
                         .end(Json.encodePrettily(accountDao.get(idAsLong).get()));
             }
+        } catch (NumberFormatException e) {
+            respondWithError(routingContext, 400, "Invalid parameter " + id);
         }
     }
 
@@ -85,8 +85,7 @@ public class MainVerticle extends AbstractVerticle {
                 respondWithError(routingContext, 400, "Can't create an account with negative balance!");
             } else {
                 accountDao.save(account);
-                routingContext.response()
-                        .setStatusCode(201)
+                routingContext.response().setStatusCode(201)
                         .putHeader("content-type", "application/json; charset=utf-8")
                         .end(Json.encodePrettily(account));
             }
