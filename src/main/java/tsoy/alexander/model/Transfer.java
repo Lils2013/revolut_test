@@ -6,21 +6,23 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Transfer {
 
-    private static final AtomicLong COUNTER = new AtomicLong();
-
     private Long id;
     private Long sourceAccountId;
     private Long destinationAccountId;
     private BigDecimal amount;
-    private LocalDateTime localDateTime;
     private TransferStatus result;
 
-    public Transfer(Long sourceAccountId, Long destinationAccountId, BigDecimal amount) {
-        this.id = COUNTER.getAndIncrement();
+    public Transfer(Long id, Long sourceAccountId, Long destinationAccountId, BigDecimal amount) {
+        this.id = id;
         this.sourceAccountId = sourceAccountId;
         this.destinationAccountId = destinationAccountId;
         this.amount = amount;
-        this.localDateTime = LocalDateTime.now();
+    }
+
+    public Transfer(Long sourceAccountId, Long destinationAccountId, BigDecimal amount) {
+        this.sourceAccountId = sourceAccountId;
+        this.destinationAccountId = destinationAccountId;
+        this.amount = amount;
     }
 
     public Transfer() {
@@ -28,6 +30,10 @@ public class Transfer {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getSourceAccountId() {
@@ -54,10 +60,6 @@ public class Transfer {
         this.amount = amount;
     }
 
-    public LocalDateTime getLocalDateTime() {
-        return localDateTime;
-    }
-
     public TransferStatus getResult() {
         return result;
     }
@@ -73,7 +75,6 @@ public class Transfer {
                 ", sourceAccountId=" + sourceAccountId +
                 ", destinationAccountId=" + destinationAccountId +
                 ", amount=" + amount +
-                ", localDateTime=" + localDateTime +
                 '}';
     }
 

@@ -18,8 +18,8 @@ import java.math.BigDecimal;
 
 public class MainVerticle extends AbstractVerticle {
 
-    private Dao<Account> accountDao = AccountDao.getInstance();
-    private Dao<Transfer> transferDao = TransferDao.getInstance();
+    private Dao<Account> accountDao = new AccountDao();
+    private Dao<Transfer> transferDao = new TransferDao();
 
     public static void main(final String[] args) {
         Launcher.executeCommand("run", MainVerticle.class.getName());
@@ -40,7 +40,6 @@ public class MainVerticle extends AbstractVerticle {
         router.get("/accounts").handler(this::getAllAccounts);
         router.get("/accounts/:id").handler(this::getAccount);
         router.post("/accounts").handler(this::createAccount);
-        router.delete("/accounts/:id").handler(this::deleteAccount);
 
         router.get("/transfers").handler(this::getAllTransfers);
         router.post("/transfers").handler(this::createTransfer);
@@ -93,21 +92,6 @@ public class MainVerticle extends AbstractVerticle {
             }
         } catch (Exception e) {
             respondWithError(routingContext, 400, "Can't parse the body of the request!");
-        }
-    }
-
-    private void deleteAccount(RoutingContext routingContext) {
-        String id = routingContext.request().getParam("id");
-        if (id == null) {
-            respondWithError(routingContext, 400, "Failed to read id");
-        } else {
-            final long idAsLong = Long.parseLong(id);
-            if (!accountDao.get(idAsLong).isPresent()) {
-                respondWithError(routingContext, 404, "Failed to find account with id " + id);
-            } else {
-                accountDao.delete(accountDao.get(idAsLong).get());
-                routingContext.response().setStatusCode(204).end();
-            }
         }
     }
 

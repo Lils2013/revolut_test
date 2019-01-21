@@ -5,23 +5,18 @@ import tsoy.alexander.model.Account;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AccountDao implements Dao<Account> {
 
     private Map<Long, Account> accountMap = new ConcurrentHashMap<>();
-    private final static AccountDao INSTANCE = new AccountDao();
+    private final AtomicLong COUNTER = new AtomicLong();
 
-    private AccountDao() {
+    public AccountDao() {
         List<Account> accounts = new ArrayList<>();
-        accounts.add(new Account("John", new BigDecimal("100.00")));
-        accounts.add(new Account("Susan", new BigDecimal("200.00")));
-        accounts.forEach(account -> {
-            accountMap.put(account.getId(), account);
-        });
-    }
-
-    public static AccountDao getInstance() {
-        return INSTANCE;
+        accounts.add(new Account(COUNTER.getAndIncrement(), "John", new BigDecimal("100.00")));
+        accounts.add(new Account(COUNTER.getAndIncrement(), "Susan", new BigDecimal("200.00")));
+        accounts.forEach(account -> accountMap.put(account.getId(), account));
     }
 
     @Override
@@ -36,6 +31,7 @@ public class AccountDao implements Dao<Account> {
 
     @Override
     public void save(Account account) {
+        account.setId(COUNTER.getAndIncrement());
         accountMap.put(account.getId(), account);
     }
 

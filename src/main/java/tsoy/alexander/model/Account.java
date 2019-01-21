@@ -5,19 +5,26 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Account {
 
-    private static final AtomicLong COUNTER = new AtomicLong();
-
     private Long id;
     private String username;
     private BigDecimal balance;
 
+    public Account(Long id, String username, BigDecimal balance) {
+        this.id = id;
+        this.username = username;
+        this.balance = balance;
+    }
+
     public Account(String username, BigDecimal balance) {
-        this.id = COUNTER.getAndIncrement();
         this.username = username;
         this.balance = balance;
     }
 
     public Account() {
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
