@@ -11,7 +11,7 @@ public class AccountDao implements Dao<Account> {
     private Map<Long, Account> accountMap = new ConcurrentHashMap<>();
     private final static AccountDao INSTANCE = new AccountDao();
 
-    public AccountDao() {
+    private AccountDao() {
         List<Account> accounts = new ArrayList<>();
         accounts.add(new Account("John", new BigDecimal("100.00")));
         accounts.add(new Account("Susan", new BigDecimal("200.00")));

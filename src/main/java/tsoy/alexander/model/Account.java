@@ -1,29 +1,23 @@
 package tsoy.alexander.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import java.math.BigDecimal;
-import java.util.Currency;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-@JsonDeserialize(using = AccountDeserializer.class)
 public class Account {
 
     private static final AtomicLong COUNTER = new AtomicLong();
 
-    private final Long id;
+    private Long id;
     private String username;
-    private BigDecimal amount;
+    private BigDecimal balance;
 
-    @JsonIgnore
-    private Object lock = new Object();
-
-    public Account(String username, BigDecimal amount) {
+    public Account(String username, BigDecimal balance) {
         this.id = COUNTER.getAndIncrement();
         this.username = username;
-        this.amount = amount;
+        this.balance = balance;
+    }
+
+    public Account() {
     }
 
     public Long getId() {
@@ -38,24 +32,20 @@ public class Account {
         this.username = username;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public BigDecimal getBalance() {
+        return balance;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public Object getLock() {
-        return lock;
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
     }
 
     public void withdraw(BigDecimal sum) {
-        amount = amount.subtract(sum);
+        balance = balance.subtract(sum);
     }
 
     public void deposit(BigDecimal sum) {
-        amount = amount.add(sum);
+        balance = balance.add(sum);
     }
 
     @Override
@@ -63,7 +53,7 @@ public class Account {
         return "Account{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", amount=" + amount +
+                ", balance=" + balance +
                 '}';
     }
 }

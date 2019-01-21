@@ -1,12 +1,9 @@
 package tsoy.alexander.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Currency;
 import java.util.concurrent.atomic.AtomicLong;
 
-@JsonDeserialize(using = TransferDeserializer.class)
 public class Transfer {
 
     private static final AtomicLong COUNTER = new AtomicLong();
@@ -24,6 +21,9 @@ public class Transfer {
         this.destinationAccountId = destinationAccountId;
         this.amount = amount;
         this.localDateTime = LocalDateTime.now();
+    }
+
+    public Transfer() {
     }
 
     public Long getId() {

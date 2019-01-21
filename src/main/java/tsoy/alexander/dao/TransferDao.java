@@ -11,7 +11,6 @@ public class TransferDao implements Dao<Transfer> {
 
     private Map<Long, Transfer> transferMap = new ConcurrentHashMap<>();
     private final static TransferDao INSTANCE = new TransferDao();
-    private Dao<Account> accountDao = AccountDao.getInstance();
 
     private TransferDao() {
     }
@@ -32,17 +31,7 @@ public class TransferDao implements Dao<Transfer> {
 
     @Override
     public void save(Transfer transfer) {
-        try {
-            if (!accountDao.get(transfer.getSourceAccountId()).isPresent() || !accountDao.get(transfer.getDestinationAccountId()).isPresent())
-                throw new IllegalAccessException();
-            transfer(accountDao.get(transfer.getSourceAccountId()).get(), accountDao.get(transfer.getDestinationAccountId()).get(),
-                    transfer.getAmount());
-            transfer.setResult(Transfer.TransferStatus.SUCCESSFUL);
-        } catch (Exception e) {
-            transfer.setResult(Transfer.TransferStatus.FAILED);
-        } finally {
-            transferMap.put(transfer.getId(), transfer);
-        }
+        transferMap.put(transfer.getId(), transfer);
     }
 
     @Override
@@ -55,18 +44,4 @@ public class TransferDao implements Dao<Transfer> {
         transferMap.remove(transfer.getId());
     }
 
-    private void transfer(Account acc1, Account acc2, BigDecimal value) {
-        Object lock1 = acc1.getId() < acc2.getId() ? acc1.getLock() : acc2.getLock();
-        Object lock2 = acc1.getId() < acc2.getId() ? acc2.getLock() : acc1.getLock();
-        synchronized (lock1) {
-            synchronized (lock2) {
-                if (acc1.getAmount().compareTo(value) >= 0) {
-                    acc1.withdraw(value);
-                    acc2.deposit(value);
-                } else {
-                    throw new IllegalStateException();
-                }
-            }
-        }
-    }
 }
