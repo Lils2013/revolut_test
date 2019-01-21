@@ -159,6 +159,22 @@ public class IntegrationTests {
     }
 
     @Test
+    @DisplayName("Should fail to create a transfer with negative amount")
+    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    void create_transfer_fail_negative(Vertx vertx, VertxTestContext testContext) {
+        WebClient client = WebClient.create(vertx);
+        client.post(8080, "localhost", "/transfers").as(BodyCodec.jsonObject())
+                .sendJsonObject(new JsonObject().put("sourceAccountId", 0).put("destinationAccountId", 1)
+                        .put("amount", "-10.00"), response -> testContext.verify(() -> {
+                    assertEquals(400, response.result().statusCode());
+                    JsonObject responseObject = response.result().body();
+                    assertEquals("ERROR", responseObject.getString("status"));
+                    assertEquals("Can't transfer negative sum!", responseObject.getString("description"));
+                    testContext.completeNow();
+                }));
+    }
+
+    @Test
     @DisplayName("Should create a transfer and get list of all transfers")
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     void create_transfer_and_get_all(Vertx vertx, VertxTestContext testContext) {
@@ -171,11 +187,30 @@ public class IntegrationTests {
                     assertEquals(0L, (long) transfer.getId());
                     assertEquals(0L, (long) transfer.getSourceAccountId());
                     assertEquals(1L, (long) transfer.getDestinationAccountId());
+                    assertEquals(Transfer.TransferStatus.SUCCESSFUL, transfer.getResult());
                     client.get(8080, "localhost", "/transfers").as(BodyCodec.jsonArray())
                             .send(getAllResponse -> testContext.verify(() -> {
                                 assertEquals(1, getAllResponse.result().body().size());
                                 testContext.completeNow();
                             }));
+                }));
+    }
+
+    @Test
+    @DisplayName("Should create a failed transfer when balance is less than amount")
+    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    void create_transfer_fail(Vertx vertx, VertxTestContext testContext) {
+        WebClient client = WebClient.create(vertx);
+        client.post(8080, "localhost", "/transfers").as(BodyCodec.json(Transfer.class))
+                .sendJsonObject(new JsonObject().put("sourceAccountId", 0).put("destinationAccountId", 1)
+                        .put("amount", "1000.00"), createResponse -> testContext.verify(() -> {
+                    assertEquals(201, createResponse.result().statusCode());
+                    Transfer transfer = createResponse.result().body();
+                    assertEquals(0L, (long) transfer.getId());
+                    assertEquals(0L, (long) transfer.getSourceAccountId());
+                    assertEquals(1L, (long) transfer.getDestinationAccountId());
+                    assertEquals(Transfer.TransferStatus.FAILED, transfer.getResult());
+                    testContext.completeNow();
                 }));
     }
 }
