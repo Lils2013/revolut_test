@@ -42,7 +42,6 @@ public class MainVerticle extends AbstractVerticle {
         router.post("/accounts").handler(this::createAccount);
 
         router.get("/transfers").handler(this::getAllTransfers);
-        //blockingHandler is chosen for concurrency control
         router.post("/transfers").blockingHandler(this::createTransfer);
 
         vertx.createHttpServer().requestHandler(router::accept).listen(8080, http -> {
