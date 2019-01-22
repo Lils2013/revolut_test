@@ -42,7 +42,8 @@ public class MainVerticle extends AbstractVerticle {
         router.post("/accounts").handler(this::createAccount);
 
         router.get("/transfers").handler(this::getAllTransfers);
-        router.post("/transfers").handler(this::createTransfer);
+        //blockingHandler is chosen for concurrency control
+        router.post("/transfers").blockingHandler(this::createTransfer);
 
         vertx.createHttpServer().requestHandler(router::accept).listen(8080, http -> {
             if (http.succeeded()) {
@@ -118,11 +119,17 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     private void transfer(Account acc1, Account acc2, BigDecimal value) {
-        if (acc1.getBalance().compareTo(value) >= 0) {
-            acc1.withdraw(value);
-            acc2.deposit(value);
-        } else {
-            throw new IllegalStateException();
+        Object lock1 = acc1.getId() < acc2.getId() ? acc1 : acc2;
+        Object lock2 = acc1.getId() < acc2.getId() ? acc2 : acc1;
+        synchronized (lock1) {
+            synchronized (lock2) {
+                if (acc1.getBalance().compareTo(value) >= 0) {
+                    acc1.withdraw(value);
+                    acc2.deposit(value);
+                } else {
+                    throw new IllegalStateException();
+                }
+            }
         }
     }
 
