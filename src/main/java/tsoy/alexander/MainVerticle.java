@@ -74,9 +74,7 @@ public class MainVerticle extends AbstractVerticle {
 
     private void createAccount(RoutingContext routingContext) {
         try {
-            JsonObject jsonObject = routingContext.getBodyAsJson();
-            final Account account = new Account(jsonObject.getString("username"),
-                    new BigDecimal(jsonObject.getString("balance")));
+            final Account account = Json.decodeValue(routingContext.getBodyAsString(), Account.class);
             if (account.getBalance().compareTo(BigDecimal.ZERO) < 0) {
                 respondWithError(routingContext, 400, "Can't create an account with negative balance!");
             } else {
@@ -94,9 +92,7 @@ public class MainVerticle extends AbstractVerticle {
 
     private void createTransfer(RoutingContext routingContext) {
         try {
-            JsonObject jsonObject = routingContext.getBodyAsJson();
-            final Transfer transfer = new Transfer(jsonObject.getLong("sourceAccountId"),
-                    jsonObject.getLong("destinationAccountId"), new BigDecimal(jsonObject.getString("amount")));
+            final Transfer transfer = Json.decodeValue(routingContext.getBodyAsString(), Transfer.class);
             if (transfer.getDestinationAccountId().equals(transfer.getSourceAccountId())) {
                 respondWithError(routingContext, 400, "Can't transfer money to the same account!");
             } else if (transfer.getAmount().compareTo(BigDecimal.ZERO) < 0) {

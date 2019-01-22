@@ -24,7 +24,7 @@ Request:
     POST localhost:8080/accounts
     {
         "username": "Morrissey",
-        "balance": "120.20"
+        "balance": 120.20
     }
 ```
 Response:
@@ -79,7 +79,7 @@ Request:
     {
         "sourceAccountId": 1,
         "destinationAccountId": 0,
-        "amount": "10.00"
+        "amount": 10.00
     }
 ```
 Response:
@@ -105,7 +105,7 @@ Request:
     {
         "sourceAccountId": 1,
         "destinationAccountId": 0,
-        "amount": "10.00"
+        "amount": 10.00
     }
 ```
 Response:
