@@ -26,7 +26,7 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     @Override
-    public void start(Future<Void> startFuture) throws Exception {
+    public void start(Future<Void> startFuture) {
 
         Router router = Router.router(vertx);
 
@@ -89,9 +89,7 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     private void getAllTransfers(RoutingContext routingContext) {
-        routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
-                .end(Json.encodePrettily(transferDao.getAll()));
+        respondWithSuccess(routingContext, Json.encodePrettily(transferDao.getAll()), 200);
     }
 
     private void createTransfer(RoutingContext routingContext) {
@@ -103,7 +101,8 @@ public class MainVerticle extends AbstractVerticle {
                 respondWithError(routingContext, 400, "Can't transfer money to the same account!");
             } else if (transfer.getAmount().compareTo(BigDecimal.ZERO) < 0) {
                 respondWithError(routingContext, 400, "Can't transfer negative sum!");
-            } else if (!accountDao.get(transfer.getSourceAccountId()).isPresent() || !accountDao.get(transfer.getDestinationAccountId()).isPresent()) {
+            } else if (!accountDao.get(transfer.getSourceAccountId()).isPresent()
+                    || !accountDao.get(transfer.getDestinationAccountId()).isPresent()) {
                 respondWithError(routingContext, 400, "Failed to find accounts with given ids");
             } else {
                 try {

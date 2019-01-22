@@ -1,8 +1,6 @@
 package tsoy.alexander.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Transfer {
 

@@ -197,7 +197,8 @@ public class IntegrationTests {
     }
 
     @Test
-    @DisplayName("Should create a failed transfer when balance is less than amount")
+    @DisplayName("Should create a failed transfer when balance is less than the amount being transferred " +
+            "and verify that the balance did not change")
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     void create_transfer_fail(Vertx vertx, VertxTestContext testContext) {
         WebClient client = WebClient.create(vertx);
@@ -210,7 +211,23 @@ public class IntegrationTests {
                     assertEquals(0L, (long) transfer.getSourceAccountId());
                     assertEquals(1L, (long) transfer.getDestinationAccountId());
                     assertEquals(Transfer.TransferStatus.FAILED, transfer.getResult());
-                    testContext.completeNow();
+                    client.get(8080, "localhost", "/accounts/0").as(BodyCodec.json(Account.class))
+                            .send(firstAccountResponse -> testContext.verify(() -> {
+                                assertEquals(200, firstAccountResponse.result().statusCode());
+                                Account account = firstAccountResponse.result().body();
+                                assertEquals(0L, (long) account.getId());
+                                assertEquals("John", account.getUsername());
+                                assertEquals(new BigDecimal("100.00"), account.getBalance());
+                                client.get(8080, "localhost", "/accounts/1").as(BodyCodec.json(Account.class))
+                                        .send(secondAccountResponse -> testContext.verify(() -> {
+                                            assertEquals(200, secondAccountResponse.result().statusCode());
+                                            Account account1 = secondAccountResponse.result().body();
+                                            assertEquals(1L, (long) account1.getId());
+                                            assertEquals("Susan", account1.getUsername());
+                                            assertEquals(new BigDecimal("200.00"), account1.getBalance());
+                                            testContext.completeNow();
+                                        }));
+                            }));
                 }));
     }
 }

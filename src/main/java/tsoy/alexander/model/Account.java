@@ -1,7 +1,6 @@
 package tsoy.alexander.model;
 
 import java.math.BigDecimal;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Account {
 
