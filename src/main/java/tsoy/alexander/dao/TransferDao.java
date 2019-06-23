@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class TransferDao implements Dao<Transfer> {
 
-    private Map<Long, Transfer> transferMap = new ConcurrentHashMap<>();
+    private final Map<Long, Transfer> transferMap = new ConcurrentHashMap<>();
     private final AtomicLong COUNTER = new AtomicLong();
 
     @Override

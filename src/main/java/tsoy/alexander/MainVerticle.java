@@ -61,11 +61,11 @@ public class MainVerticle extends AbstractVerticle {
     private void getAccount(RoutingContext routingContext) {
         String id = routingContext.request().getParam("id");
         try {
-            final long idAsLong = Long.parseLong(id);
-            if (!accountDao.get(idAsLong).isPresent()) {
-                respondWithError(routingContext, 404, "Failed to find account with id " + id);
-            } else {
+            long idAsLong = Long.parseLong(id);
+            if (accountDao.get(idAsLong).isPresent()) {
                 respondWithSuccess(routingContext, Json.encodePrettily(accountDao.get(idAsLong).get()), 200);
+            } else {
+                respondWithError(routingContext, 404, "Failed to find account with id " + id);
             }
         } catch (NumberFormatException e) {
             respondWithError(routingContext, 400, "Invalid parameter " + id);
@@ -74,12 +74,12 @@ public class MainVerticle extends AbstractVerticle {
 
     private void createAccount(RoutingContext routingContext) {
         try {
-            final Account account = Json.decodeValue(routingContext.getBodyAsString(), Account.class);
-            if (account.getBalance().compareTo(BigDecimal.ZERO) < 0) {
-                respondWithError(routingContext, 400, "Can't create an account with negative balance!");
-            } else {
+            Account account = Json.decodeValue(routingContext.getBodyAsString(), Account.class);
+            if (account.getBalance().compareTo(BigDecimal.ZERO) >= 0) {
                 accountDao.save(account);
                 respondWithSuccess(routingContext, Json.encodePrettily(account), 201);
+            } else {
+                respondWithError(routingContext, 400, "Can't create an account with negative balance!");
             }
         } catch (Exception e) {
             respondWithError(routingContext, 400, "Can't parse the body of the request!");
@@ -92,7 +92,7 @@ public class MainVerticle extends AbstractVerticle {
 
     private void createTransfer(RoutingContext routingContext) {
         try {
-            final Transfer transfer = Json.decodeValue(routingContext.getBodyAsString(), Transfer.class);
+            Transfer transfer = Json.decodeValue(routingContext.getBodyAsString(), Transfer.class);
             if (transfer.getDestinationAccountId().equals(transfer.getSourceAccountId())) {
                 respondWithError(routingContext, 400, "Can't transfer money to the same account!");
             } else if (transfer.getAmount().compareTo(BigDecimal.ZERO) < 0) {

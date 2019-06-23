@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class AccountDao implements Dao<Account> {
 
-    private Map<Long, Account> accountMap = new ConcurrentHashMap<>();
+    private final Map<Long, Account> accountMap = new ConcurrentHashMap<>();
     private final AtomicLong COUNTER = new AtomicLong();
 
     public AccountDao() {
