@@ -6,7 +6,7 @@ public class Account {
 
     private Long id;
     private String username;
-    private volatile BigDecimal balance;
+    private BigDecimal balance;
 
     public Account(Long id, String username, BigDecimal balance) {
         this.id = id;
