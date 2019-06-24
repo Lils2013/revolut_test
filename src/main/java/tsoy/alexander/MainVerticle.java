@@ -102,7 +102,7 @@ public class MainVerticle extends AbstractVerticle {
                 respondWithError(routingContext, 400, "Failed to find accounts with given ids");
             } else {
                 try {
-                    transfer(accountDao.get(transfer.getSourceAccountId()).get(), accountDao.get(transfer.getDestinationAccountId()).get(),
+                    processTransfer(accountDao.get(transfer.getSourceAccountId()).get(), accountDao.get(transfer.getDestinationAccountId()).get(),
                             transfer.getAmount());
                     transfer.setResult(Transfer.TransferStatus.SUCCESSFUL);
                 } catch (Exception e) {
@@ -117,11 +117,9 @@ public class MainVerticle extends AbstractVerticle {
         }
     }
 
-    private void transfer(Account acc1, Account acc2, BigDecimal value) {
-        Object lock1 = acc1.getId() < acc2.getId() ? acc1 : acc2;
-        Object lock2 = acc1.getId() < acc2.getId() ? acc2 : acc1;
-        synchronized (lock1) {
-            synchronized (lock2) {
+    private void processTransfer(Account acc1, Account acc2, BigDecimal value) {
+        synchronized (acc1.getId() < acc2.getId() ? acc1 : acc2) {
+            synchronized (acc1.getId() < acc2.getId() ? acc2 : acc1) {
                 if (acc1.getBalance().compareTo(value) >= 0) {
                     acc1.withdraw(value);
                     acc2.deposit(value);
