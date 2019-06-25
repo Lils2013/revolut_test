@@ -6,7 +6,7 @@ public class Account {
 
     private Long id;
     private String username;
-    private BigDecimal balance;
+    private volatile BigDecimal balance;
 
     public Account(Long id, String username, BigDecimal balance) {
         this.id = id;
@@ -46,11 +46,11 @@ public class Account {
         this.balance = balance;
     }
 
-    public void withdraw(BigDecimal sum) {
+    public synchronized void withdraw(BigDecimal sum) {
         balance = balance.subtract(sum);
     }
 
-    public void deposit(BigDecimal sum) {
+    public synchronized void deposit(BigDecimal sum) {
         balance = balance.add(sum);
     }
 
