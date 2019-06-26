@@ -15,6 +15,7 @@ import tsoy.alexander.model.Account;
 import tsoy.alexander.model.Transfer;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public class MainVerticle extends AbstractVerticle {
 
@@ -62,8 +63,9 @@ public class MainVerticle extends AbstractVerticle {
         String id = routingContext.request().getParam("id");
         try {
             long idAsLong = Long.parseLong(id);
-            if (accountDao.get(idAsLong).isPresent()) {
-                respondWithSuccess(routingContext, Json.encodePrettily(accountDao.get(idAsLong).get()), 200);
+            Optional<Account> result = accountDao.get(idAsLong);
+            if (result.isPresent()) {
+                respondWithSuccess(routingContext, Json.encodePrettily(result.get()), 200);
             } else {
                 respondWithError(routingContext, 404, "Failed to find account with id " + id);
             }
@@ -93,16 +95,18 @@ public class MainVerticle extends AbstractVerticle {
     private void createTransfer(RoutingContext routingContext) {
         try {
             Transfer transfer = Json.decodeValue(routingContext.getBodyAsString(), Transfer.class);
+            Optional<Account> sourceAccount = accountDao.get(transfer.getSourceAccountId());
+            Optional<Account> destinationAccount = accountDao.get(transfer.getDestinationAccountId());
             if (transfer.getDestinationAccountId().equals(transfer.getSourceAccountId())) {
                 respondWithError(routingContext, 400, "Can't transfer money to the same account!");
             } else if (transfer.getAmount().compareTo(BigDecimal.ZERO) < 0) {
                 respondWithError(routingContext, 400, "Can't transfer negative sum!");
-            } else if (!accountDao.get(transfer.getSourceAccountId()).isPresent()
-                    || !accountDao.get(transfer.getDestinationAccountId()).isPresent()) {
+            } else if (!sourceAccount.isPresent()
+                    || !destinationAccount.isPresent()) {
                 respondWithError(routingContext, 400, "Failed to find accounts with given ids");
             } else {
                 try {
-                    processTransfer(accountDao.get(transfer.getSourceAccountId()).get(), accountDao.get(transfer.getDestinationAccountId()).get(),
+                    processTransfer(sourceAccount.get(), destinationAccount.get(),
                             transfer.getAmount());
                     transfer.setResult(Transfer.TransferStatus.SUCCESSFUL);
                 } catch (Exception e) {
